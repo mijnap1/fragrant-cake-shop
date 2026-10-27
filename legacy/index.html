@@ -1,0 +1,1175 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>향기로운 케이크 가게</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #f48fb1;
+    --pink-d: #e0688f;
+    --pink-l: #ffe4ec;
+    --cream: #fffaf5;
+    --ink: #5a3e45;
+    --ink-soft: #9a7880;
+    --gold: #e0a93b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  [hidden] { display: none !important; }
+  html, body {
+    height: 100%; overflow: hidden;
+    background: #ffeef3; color: var(--ink);
+    font-family: 'Gowun Dodum', sans-serif;
+    -webkit-tap-highlight-color: transparent; user-select: none;
+  }
+  button { font-family: inherit; cursor: pointer; }
+
+  #stage { position: fixed; inset: 0; overflow: hidden; }
+  #bg { position: absolute; inset: 0; transition: opacity .35s ease; }
+  #bg.fade { opacity: 0; }
+  #bg svg { width: 100%; height: 100%; display: block; }
+  #clickLayer { position: absolute; inset: 0; }
+
+  /* ---------- characters ---------- */
+  #chars { position: absolute; inset: 0; pointer-events: none; }
+  .char {
+    position: absolute; bottom: 0; transform: translateX(-50%);
+    transition: left .5s ease, filter .3s ease, opacity .35s ease;
+  }
+  .char svg { height: 100%; width: auto; display: block; filter: drop-shadow(0 8px 14px rgba(150, 70, 95, .18)); }
+  .char.rin { height: min(78vh, 105vw); }
+  .char.kao { height: min(69vh, 93vw); }
+  .pos-left { left: 27%; } .pos-center { left: 50%; } .pos-right { left: 73%; }
+  .char.dim { filter: brightness(.86) saturate(.85); }
+  .char.out { opacity: 0; }
+  .char.enter { animation: charIn .45s ease; }
+  .char.hop svg { animation: hop .35s ease; }
+  @keyframes charIn { from { opacity: 0; transform: translate(-50%, 24px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  @keyframes hop { 40% { transform: translateY(-14px); } }
+
+  /* ---------- dialogue box ---------- */
+  #box {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    bottom: max(16px, env(safe-area-inset-bottom));
+    width: min(920px, calc(100% - 32px)); min-height: 150px;
+    background: rgba(255, 253, 250, .95);
+    border: 3px solid #ffc7d6; border-radius: 26px;
+    box-shadow: 0 12px 30px rgba(224, 104, 143, .22), inset 0 0 0 6px #fff;
+    padding: 30px 30px 24px; cursor: pointer; z-index: 5;
+  }
+  #box::before, #box::after {
+    content: '✿'; position: absolute; color: #ffc7d6; font-size: 20px;
+  }
+  #box::before { top: 8px; right: 16px; }
+  #box::after { bottom: 6px; left: 14px; font-size: 14px; }
+  #nameTag {
+    position: absolute; top: -20px; left: 26px;
+    padding: 6px 20px; border-radius: 999px;
+    font-family: 'Jua'; font-size: 20px; color: #fff; background: var(--pink);
+    border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
+  }
+  #text {
+    font-size: clamp(16px, 2.1vw, 20px); line-height: 1.75;
+    min-height: 3.5em; white-space: pre-wrap; word-break: keep-all;
+  }
+  #text.narr { color: var(--ink-soft); }
+  #next { position: absolute; right: 24px; bottom: 14px; color: var(--pink); font-size: 14px; animation: bob 1s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(4px); } }
+
+  /* ---------- choices ---------- */
+  #choices {
+    position: absolute; left: 0; right: 0; top: 64px; bottom: 200px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; padding: 0 16px; z-index: 6;
+  }
+  .choice {
+    width: min(560px, 100%); padding: 16px 26px;
+    font-weight: 700; font-size: clamp(15px, 2vw, 18px); color: var(--ink);
+    border-radius: 999px; border: 3px solid #fff;
+    background: linear-gradient(#fff, #fff3f7);
+    box-shadow: 0 6px 0 #f6b8ca, 0 12px 24px rgba(224, 104, 143, .25);
+    transition: transform .15s ease, box-shadow .15s ease;
+    animation: popIn .3s ease backwards;
+  }
+  .choice:nth-child(2) { animation-delay: .06s; } .choice:nth-child(3) { animation-delay: .12s; }
+  .choice::before { content: '♡ '; color: var(--pink); }
+  .choice:hover { transform: translateY(-2px); }
+  .choice:hover::before { content: '♥ '; }
+  .choice:active { transform: translateY(4px); box-shadow: 0 2px 0 #f6b8ca; }
+  @keyframes popIn { from { opacity: 0; transform: scale(.9) translateY(10px); } }
+
+  /* ---------- HUD ---------- */
+  #hud { position: absolute; top: max(14px, env(safe-area-inset-top)); right: 16px; display: flex; gap: 8px; z-index: 7; }
+  .hbtn {
+    font-family: 'Jua'; font-size: 15px; padding: 8px 15px;
+    border-radius: 999px; border: 2px solid #fff;
+    background: rgba(255, 255, 255, .88); color: var(--pink-d);
+    box-shadow: 0 3px 0 #f6c3d1;
+  }
+  .hbtn.on { background: var(--pink); color: #fff; }
+
+  /* ---------- screens & cards ---------- */
+  .screen { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 20; }
+  .overlay { background: rgba(255, 228, 236, .55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .card {
+    background: var(--cream); border: 4px solid #fff; border-radius: 30px;
+    box-shadow: 0 18px 50px rgba(224, 104, 143, .28), 0 0 0 3px #ffd3df;
+    padding: 28px; width: min(480px, 100%);
+    max-height: calc(100dvh - 32px); overflow: auto;
+    animation: popIn .35s ease;
+  }
+  .btn {
+    font-family: 'Jua'; font-size: 20px; color: #fff;
+    padding: 14px 28px; border-radius: 999px; border: 3px solid #fff;
+    background: linear-gradient(#f9a3c0, var(--pink-d));
+    box-shadow: 0 6px 0 #c9557c, 0 12px 24px rgba(224, 104, 143, .3);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #c9557c; }
+  .btn.sub { background: #fff; color: var(--pink-d); box-shadow: 0 6px 0 #f6c3d1, 0 12px 24px rgba(224, 104, 143, .18); border-color: #ffd3df; }
+  .btn:disabled { opacity: .45; pointer-events: none; }
+  .btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  /* title */
+  #titleScr { background: radial-gradient(circle at 50% 30%, #fffaf5 0%, #ffe4ec 55%, #ffd1df 100%); flex-direction: column; text-align: center; }
+  #titleScr::before {
+    content: ''; position: absolute; inset: 0; opacity: .5;
+    background-image: radial-gradient(#fff 2px, transparent 2.5px);
+    background-size: 34px 34px;
+  }
+  .title-wrap { position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .ribbon {
+    font-family: 'Jua'; font-size: 15px; color: #fff; letter-spacing: .08em;
+    background: var(--pink); padding: 6px 18px; border-radius: 999px;
+    box-shadow: 0 4px 0 #e47a9c;
+  }
+  .title-wrap h1 {
+    font-family: 'Jua'; font-weight: 400; line-height: 1.05;
+    font-size: clamp(44px, 9vw, 84px); color: var(--pink-d);
+    text-shadow: 0 4px 0 #fff, 4px 0 0 #fff, -4px 0 0 #fff, 0 -4px 0 #fff, 0 10px 22px rgba(224, 104, 143, .35);
+  }
+  .title-wrap h1 span { color: #c9557c; }
+  .sub-title { color: var(--ink-soft); font-size: clamp(14px, 2vw, 17px); }
+  .title-cake { width: clamp(170px, 30vw, 240px); animation: float 3s ease-in-out infinite; }
+  @keyframes float { 50% { transform: translateY(-10px) rotate(-2deg); } }
+  .badges { display: flex; gap: 8px; justify-content: center; align-items: center; color: var(--ink-soft); font-size: 14px; }
+  .badge { font-size: 22px; filter: grayscale(1); opacity: .35; }
+  .badge.got { filter: none; opacity: 1; }
+  .note { color: #b8949c; font-size: 13px; }
+
+  /* name */
+  .name-card { text-align: center; display: flex; flex-direction: column; gap: 16px; }
+  .name-card h2 { font-family: 'Jua'; font-weight: 400; font-size: 26px; color: var(--pink-d); }
+  .name-card p { color: var(--ink-soft); line-height: 1.6; }
+  #nameInput {
+    font-family: 'Jua'; font-size: 24px; text-align: center; color: var(--ink);
+    padding: 12px 16px; border-radius: 18px; border: 3px solid #ffc7d6; background: #fff; outline: none;
+    user-select: text;
+  }
+  #nameInput:focus { border-color: var(--pink); box-shadow: 0 0 0 4px #ffe0e9; }
+
+  /* log */
+  .log-card { width: min(640px, 100%); }
+  .log-card h2 { font-family: 'Jua'; font-weight: 400; color: var(--pink-d); margin-bottom: 14px; }
+  #logList { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
+  .log-item { line-height: 1.6; white-space: pre-wrap; word-break: keep-all; }
+  .log-item b { font-family: 'Jua'; font-weight: 400; margin-right: 6px; }
+  .log-item.narr { color: var(--ink-soft); }
+  .log-item.me { color: #8c74c9; }
+
+  /* cake */
+  .cake-card { width: min(900px, 100%); display: grid; grid-template-columns: 1fr 1.1fr; gap: 22px; }
+  .cake-card h2 { grid-column: 1 / -1; font-family: 'Jua'; font-weight: 400; font-size: 26px; color: var(--pink-d); text-align: center; }
+  .preview {
+    background: radial-gradient(circle at 50% 45%, #fff 0%, #ffeef3 75%);
+    border-radius: 22px; border: 3px dashed #ffd3df;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 14px; gap: 6px;
+  }
+  .preview svg { width: 100%; max-width: 340px; }
+  .preview svg.pop { animation: hop .35s ease; }
+  #cakeLabel { font-family: 'Jua'; color: var(--ink-soft); text-align: center; min-height: 1.4em; }
+  .opt-group h3 { font-family: 'Jua'; font-weight: 400; font-size: 18px; color: var(--pink-d); margin: 4px 0 8px; }
+  .opt-group + .opt-group { margin-top: 12px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 15px 9px 10px; border-radius: 999px;
+    border: 2px solid #f6d0dc; background: #fff;
+    font-weight: 700; font-size: 15px; color: var(--ink);
+    transition: transform .12s ease;
+  }
+  .chip:hover { transform: translateY(-1px); }
+  .chip.on { border-color: var(--pink); background: var(--pink-l); box-shadow: 0 0 0 3px #ffd6e2; }
+  .sw { width: 20px; height: 20px; border-radius: 50%; border: 2px solid rgba(0, 0, 0, .08); flex: none; }
+  .chip svg { width: 22px; height: 22px; flex: none; }
+  .tip { font-size: 14px; line-height: 1.6; color: var(--ink-soft); background: #fff3f6; border-radius: 14px; padding: 10px 14px; margin: 16px 0; }
+  @media (max-width: 720px) {
+    .cake-card { grid-template-columns: 1fr; gap: 14px; padding: 20px; }
+    .preview svg { max-width: 240px; }
+  }
+
+  /* ending */
+  .end-card { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .end-emoji { font-size: 64px; animation: float 3s ease-in-out infinite; }
+  .end-card h2 { font-family: 'Jua'; font-weight: 400; font-size: clamp(28px, 5vw, 36px); color: var(--pink-d); }
+  .end-card p { line-height: 1.7; white-space: pre-wrap; word-break: keep-all; }
+  .end-stats { color: var(--ink-soft); font-size: 14px; }
+
+  /* pops & petals */
+  #pops { position: absolute; inset: 0; pointer-events: none; z-index: 30; }
+  .pop {
+    position: absolute; left: 50%; top: 18%; transform: translateX(-50%);
+    font-family: 'Jua'; font-size: 22px; padding: 6px 16px; border-radius: 999px;
+    background: #fff; box-shadow: 0 6px 18px rgba(224, 104, 143, .25);
+    animation: popUp 1.6s ease forwards;
+  }
+  @keyframes popUp {
+    0% { opacity: 0; transform: translate(-50%, 20px) scale(.8); }
+    20% { opacity: 1; transform: translate(-50%, 0) scale(1.05); }
+    75% { opacity: 1; transform: translate(-50%, -10px) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -30px); }
+  }
+  #petals { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 25; }
+  .petal {
+    position: absolute; top: -20px; width: 13px; height: 9px;
+    background: #ffc1d3; border-radius: 100% 0 100% 0; opacity: .8;
+    animation: fall linear infinite;
+  }
+  @keyframes fall { to { transform: translate(var(--dx), 110vh) rotate(600deg); } }
+
+  @media (max-width: 600px) {
+    #box { min-height: 130px; padding: 26px 20px 22px; }
+    #nameTag { font-size: 17px; left: 18px; }
+    .pos-left { left: 26%; } .pos-right { left: 74%; }
+    #choices { bottom: 170px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg"></div>
+  <div id="clickLayer"></div>
+  <div id="chars"></div>
+
+  <div id="box" hidden>
+    <div id="nameTag" hidden></div>
+    <div id="text"></div>
+    <div id="next" hidden>▼</div>
+  </div>
+  <div id="choices" hidden></div>
+
+  <div id="hud" hidden>
+    <button class="hbtn" id="logBtn">기록</button>
+    <button class="hbtn" id="autoBtn">자동</button>
+    <button class="hbtn" id="titleBtn">타이틀</button>
+  </div>
+
+  <!-- title -->
+  <div id="titleScr" class="screen">
+    <div class="title-wrap">
+      <div class="ribbon">팬메이드 비주얼 노벨</div>
+      <h1>향기로운<br><span>케이크 가게</span></h1>
+      <p class="sub-title">― 「향기로운 꽃은 늠름하게 핀다」 팬 에피소드 ―</p>
+      <div class="title-cake" id="titleCake"></div>
+      <div class="btns">
+        <button class="btn" id="startBtn">시작하기</button>
+        <button class="btn sub" id="continueBtn">이어하기</button>
+      </div>
+      <div class="badges" id="titleBadges"></div>
+      <p class="note">비공식 팬 작품 · 초안 v0.1</p>
+    </div>
+  </div>
+
+  <!-- name -->
+  <div id="nameScr" class="screen overlay" hidden>
+    <div class="card name-card">
+      <h2>처음 뵙겠습니다! 🍓</h2>
+      <p>오늘부터 케이크 가게에서<br>아르바이트를 하게 된 당신의 이름은?</p>
+      <input id="nameInput" maxlength="8" placeholder="하나" autocomplete="off">
+      <div class="btns"><button class="btn" id="nameOk">결정!</button></div>
+    </div>
+  </div>
+
+  <!-- cake -->
+  <div id="cakeScr" class="screen overlay" hidden>
+    <div class="card cake-card">
+      <h2>🎂 첫 케이크 만들기</h2>
+      <div class="preview">
+        <div id="cakePreview"></div>
+        <div id="cakeLabel"></div>
+      </div>
+      <div>
+        <div id="cakeOpts"></div>
+        <div class="tip">💡 린타로: “와구리 씨가 좋아하는 걸 떠올려 봐.”</div>
+        <div class="btns"><button class="btn" id="cakeDone" disabled>완성!</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- log -->
+  <div id="logScr" class="screen overlay" hidden>
+    <div class="card log-card">
+      <h2>📖 대화 기록</h2>
+      <div id="logList"></div>
+      <div class="btns"><button class="btn sub" id="logClose">닫기</button></div>
+    </div>
+  </div>
+
+  <!-- ending -->
+  <div id="endScr" class="screen overlay" hidden>
+    <div class="card end-card">
+      <div class="ribbon">ENDING</div>
+      <div class="end-emoji" id="endEmoji"></div>
+      <h2 id="endTitle"></h2>
+      <p id="endDesc"></p>
+      <div class="end-stats" id="endStats"></div>
+      <div class="badges" id="endBadges"></div>
+      <div class="btns">
+        <button class="btn" id="againBtn">처음부터 다시</button>
+        <button class="btn sub" id="endTitleBtn">타이틀로</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pops"></div>
+  <div id="petals"></div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} },
+};
+const SAVE_KEY = 'kaoru-vn-save';
+const END_KEY = 'kaoru-vn-endings';
+
+/* =========================================================
+   Characters (placeholder chibi SVGs — swap for real art later)
+   ========================================================= */
+const DARK = '#3b2a33';
+
+function eyes(e, o) {
+  const Y = 120;
+  if (e === 'smile' || e === 'happy') {
+    return [78, 122].map(x =>
+      `<path d="M${x - 10} ${Y + 2} Q${x} ${Y - 10} ${x + 10} ${Y + 2}" fill="none" stroke="${DARK}" stroke-width="4" stroke-linecap="round"/>`).join('');
+  }
+  const big = e === 'surprised';
+  const rx = o.sharp ? (big ? 7 : 6) : (big ? 9 : 8);
+  const ry = o.sharp ? (big ? 8.5 : 6.5) : (big ? 11.5 : 10.5);
+  return [78, 122].map(x => `
+    <ellipse cx="${x}" cy="${Y}" rx="${rx}" ry="${ry}" fill="${o.iris}"/>
+    <ellipse cx="${x}" cy="${Y + 1.5}" rx="${rx * .55}" ry="${ry * .6}" fill="${DARK}"/>
+    <circle cx="${x - rx * .35}" cy="${Y - ry * .4}" r="${rx * .4}" fill="#fff"/>
+    <circle cx="${x + rx * .4}" cy="${Y + ry * .35}" r="${rx * .18}" fill="#fff"/>
+    <path d="M${x - rx - 3} ${Y - ry + (o.sharp ? 3 : 1)} Q${x} ${Y - ry - (o.sharp ? 2 : 4)} ${x + rx + 3} ${Y - ry + (o.sharp ? 3 : 1)}" fill="none" stroke="${DARK}" stroke-width="${o.sharp ? 4 : 3.5}" stroke-linecap="round"/>`).join('');
+}
+
+function brows(e, o) {
+  let l, r;
+  if (e === 'surprised' || e === 'happy') { l = 'M66 95 Q77 89 88 94'; r = 'M112 94 Q123 89 134 95'; }
+  else if (e === 'blush' || e === 'troubled') { l = 'M66 103 Q77 99 88 96'; r = 'M112 96 Q123 99 134 103'; }
+  else if (o.sharp) { l = 'M65 99 Q77 101 89 106'; r = 'M111 106 Q123 101 135 99'; }
+  else { l = 'M67 100 Q77 96 88 99'; r = 'M112 99 Q123 96 133 100'; }
+  return [l, r].map(d => `<path d="${d}" fill="none" stroke="${o.brow}" stroke-width="3.5" stroke-linecap="round"/>`).join('');
+}
+
+function mouth(e, o) {
+  const line = d => `<path d="${d}" fill="none" stroke="${DARK}" stroke-width="3" stroke-linecap="round"/>`;
+  switch (e) {
+    case 'smile': return `<path d="M90 140 Q100 155 110 140 Z" fill="#d9607a"/>`;
+    case 'happy': return `<path d="M86 139 Q100 160 114 139 Z" fill="#d9607a"/><path d="M93 149 Q100 154 107 149 Q100 146 93 149" fill="#ff9fb0"/>`;
+    case 'surprised': return `<ellipse cx="100" cy="147" rx="5.5" ry="7" fill="#d9607a"/>`;
+    case 'blush': return line('M91 146 Q95.5 142 100 146 Q104.5 150 109 146');
+    case 'troubled': return line('M93 148 Q100 143 107 148');
+    default: return o.sharp ? line('M93 146 L107 146') : line('M93 143 Q100 149 107 143');
+  }
+}
+
+function face(e, o) {
+  const strong = e === 'blush' || e === 'happy';
+  const op = strong ? .75 : (o.sharp ? 0 : .35);
+  let s = brows(e, o) + eyes(e, o) + mouth(e, o);
+  s += `<path d="M100 130 l-2 4" stroke="#e6b3a3" stroke-width="2" stroke-linecap="round"/>`;
+  s += [70, 130].map(x => `<ellipse cx="${x}" cy="137" rx="11" ry="6" fill="#ff8fab" opacity="${op}"/>`).join('');
+  if (e === 'blush') s += [64, 124].map(x => `<path d="M${x} 134 l4 -5 M${x + 6} 134 l4 -5 M${x + 12} 134 l4 -5" stroke="#f26b8f" stroke-width="2" stroke-linecap="round"/>`).join('');
+  if (e === 'troubled') s += `<path d="M152 86 Q159 98 152 103 Q145 98 152 86 Z" fill="#9fd6f5"/>`;
+  if (e === 'happy') s += sparkle(166, 70, 9) + sparkle(30, 92, 6) + sparkle(176, 108, 5);
+  if (e === 'surprised') s += `<path d="M168 62 l6 -12 M178 72 l12 -6 M172 68 l10 -10" stroke="${o.accent}" stroke-width="3" stroke-linecap="round"/>`;
+  return s;
+}
+
+function sparkle(x, y, r) {
+  return `<path d="M${x} ${y - r} Q${x} ${y} ${x + r} ${y} Q${x} ${y} ${x} ${y + r} Q${x} ${y} ${x - r} ${y} Q${x} ${y} ${x} ${y - r} Z" fill="#ffd36e"/>`;
+}
+
+function drawRin(e) {
+  const hair = '#f2cf6b', hairS = '#ddb04c', skin = '#ffe3d3';
+  return `<svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
+    <path d="M38 112 Q34 36 100 34 Q166 36 162 112 Z" fill="${hairS}"/>
+    <rect x="88" y="158" width="24" height="36" rx="8" fill="#f7d1c1"/>
+    <path d="M34 300 Q36 204 100 188 Q164 204 166 300 Z" fill="#fdfcfc" stroke="#ebe1e1" stroke-width="2"/>
+    <path d="M86 188 L100 212 L92 216 L76 196 Z M114 188 L100 212 L108 216 L124 196 Z" fill="#fff" stroke="#e3d8d8" stroke-width="2"/>
+    <path d="M70 232 L86 194 M130 232 L114 194" stroke="#e59f8e" stroke-width="6" stroke-linecap="round"/>
+    <path d="M60 300 L64 230 Q100 220 136 230 L140 300 Z" fill="#f2b8a8"/>
+    <rect x="84" y="256" width="32" height="24" rx="7" fill="#f7cfc4" stroke="#e59f8e" stroke-width="2"/>
+    <path d="M100 274 Q90 266 95 262 Q99 260 100 264 Q101 260 105 262 Q110 266 100 274 Z" fill="#e8738f"/>
+    <circle cx="40" cy="122" r="11" fill="${skin}"/><circle cx="160" cy="122" r="11" fill="${skin}"/>
+    <circle cx="100" cy="112" r="60" fill="${skin}"/>
+    <circle cx="36" cy="128" r="2.6" fill="#c3c7d4"/><circle cx="38" cy="136" r="3.4" fill="#c3c7d4"/>
+    <circle cx="163" cy="138" r="5" fill="none" stroke="#c3c7d4" stroke-width="2.5"/>
+    <path d="M38 108 L44 64 L58 74 L64 44 L82 64 L96 32 L110 62 L128 42 L136 72 L152 60 L162 108 Q154 84 140 80 L128 96 L118 78 L104 94 L92 78 L80 96 L66 80 Q48 86 38 108 Z" fill="${hair}"/>
+    <path d="M70 58 Q100 44 130 58" fill="none" stroke="#fff3c4" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+    ${face(e, { iris: '#7a5b3a', brow: '#c9993a', sharp: true, accent: '#e0a93b' })}
+  </svg>`;
+}
+
+function drawKao(e) {
+  const hair = '#3a2b46', skin = '#ffe7da';
+  return `<svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
+    <path d="M38 112 Q32 38 100 36 Q168 38 162 112 L166 178 Q152 190 140 174 L138 130 L62 130 L60 174 Q48 190 34 178 Z" fill="${hair}"/>
+    <rect x="88" y="158" width="24" height="36" rx="8" fill="#f7d4c4"/>
+    <path d="M40 300 Q42 205 100 188 Q158 205 160 300 Z" fill="#fffdf8" stroke="#eadfe3" stroke-width="2"/>
+    <path d="M58 204 Q100 182 142 204 L120 254 L100 224 L80 254 Z" fill="#3f4c86"/>
+    <path d="M66 206 Q100 190 134 206" fill="none" stroke="#fff" stroke-width="2.5"/>
+    <path d="M100 230 L78 218 L80 244 Z M100 230 L122 218 L120 244 Z" fill="#e45a78"/>
+    <path d="M96 232 L90 262 L100 254 L110 262 L104 232 Z" fill="#e45a78"/>
+    <circle cx="100" cy="230" r="6.5" fill="#c9405f"/>
+    <circle cx="100" cy="112" r="60" fill="${skin}"/>
+    <path d="M40 108 Q38 44 100 42 Q162 44 160 108 Q156 86 142 76 Q136 92 122 94 Q118 80 112 72 Q104 90 86 92 Q84 80 80 74 Q66 88 52 88 Q44 96 40 108 Z" fill="${hair}"/>
+    <path d="M40 100 Q30 140 40 176 Q50 182 56 170 Q50 140 56 106 Z M160 100 Q170 140 160 176 Q150 182 144 170 Q150 140 144 106 Z" fill="${hair}"/>
+    <path d="M62 62 Q100 46 138 62" fill="none" stroke="#6a5584" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+    <g transform="translate(142 70)">
+      ${[0, 72, 144, 216, 288].map(a => `<circle cx="${Math.cos(a * Math.PI / 180) * 7}" cy="${Math.sin(a * Math.PI / 180) * 7}" r="5.5" fill="#ffb3c8"/>`).join('')}
+      <circle r="4" fill="#ffe08a"/>
+    </g>
+    ${face(e, { iris: '#8a5a6e', brow: '#3a2b46', sharp: false, accent: '#ec7fa0' })}
+  </svg>`;
+}
+
+const CHARS = {
+  rin: { name: '린타로', color: '#e0a93b', draw: drawRin },
+  kao: { name: '카오루코', color: '#ec7fa0', draw: drawKao },
+};
+
+/* =========================================================
+   Backgrounds
+   ========================================================= */
+function starPath(R, r) {
+  let d = '';
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r : R;
+    d += (i ? 'L' : 'M') + (Math.cos(a) * rr).toFixed(1) + ' ' + (Math.sin(a) * rr).toFixed(1);
+  }
+  return d + 'Z';
+}
+
+function bgShop() {
+  const flags = ['#ffb3c7', '#fff1b8', '#c9e7d6', '#d9ccf5'];
+  let bunting = '';
+  for (let x = 0, i = 0; x < 1600; x += 80, i++) bunting += `<path d="M${x + 4} 46 L${x + 76} 46 L${x + 40} 100 Z" fill="${flags[i % 4]}"/>`;
+  let lamps = '';
+  for (const x of [470, 800, 1130]) lamps += `
+    <line x1="${x}" y1="40" x2="${x}" y2="128" stroke="#d6a9b3" stroke-width="3"/>
+    <circle cx="${x}" cy="175" r="100" fill="url(#glow)"/>
+    <path d="M${x - 42} 166 Q${x} 104 ${x + 42} 166 Z" fill="#ffd36e"/>
+    <circle cx="${x}" cy="170" r="9" fill="#fffbe6"/>`;
+  const cakeCols = [['#ffe3a3', '#fffdf7', '#ef4f6c'], ['#8a5a44', '#b77b5f', '#ffd36e'], ['#b5d39a', '#fffdf7', '#7fb77e'], ['#ffe3a3', '#ffc8d6', '#ef4f6c']];
+  let cakes = '';
+  for (let i = 0; i < 8; i++) {
+    const x = 92 + i * 117, [b, c, t] = cakeCols[i % 4];
+    cakes += `
+      <ellipse cx="${x}" cy="182" rx="46" ry="8" fill="#fff" opacity=".9"/>
+      <rect x="${x - 34}" y="140" width="68" height="40" rx="6" fill="${b}"/>
+      <rect x="${x - 34}" y="156" width="68" height="7" fill="${c}"/>
+      <ellipse cx="${x}" cy="140" rx="34" ry="9" fill="${c}"/>
+      <circle cx="${x}" cy="131" r="8" fill="${t}"/>`;
+  }
+  let jars = '';
+  ['#ffc8d6', '#ffe3a3', '#cde8f5', '#d9ccf5'].forEach((c, i) => {
+    const x = 40 + i * 110;
+    jars += `<rect x="${x}" y="52" width="64" height="68" rx="16" fill="${c}" opacity=".9"/>
+             <rect x="${x + 6}" y="40" width="52" height="16" rx="6" fill="#d4a373"/>
+             <circle cx="${x + 22}" cy="88" r="9" fill="#e8b27f"/><circle cx="${x + 42}" cy="98" r="9" fill="#e8b27f"/>`;
+  });
+  return `<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="wp" width="80" height="80" patternUnits="userSpaceOnUse">
+        <rect width="80" height="80" fill="#ffeef3"/><rect width="40" height="80" fill="#ffe5ed"/><circle cx="60" cy="20" r="4" fill="#ffd3e0"/>
+      </pattern>
+      <pattern id="fl" width="120" height="120" patternUnits="userSpaceOnUse">
+        <rect width="120" height="120" fill="#efd3b8"/><rect width="60" height="60" fill="#f7e4d2"/><rect x="60" y="60" width="60" height="60" fill="#f7e4d2"/>
+      </pattern>
+      <linearGradient id="win" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe6ff"/><stop offset="1" stop-color="#fff3d9"/></linearGradient>
+      <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#d8f1f5" stop-opacity=".7"/></linearGradient>
+      <radialGradient id="glow"><stop offset="0" stop-color="#fff6c9" stop-opacity=".9"/><stop offset="1" stop-color="#fff6c9" stop-opacity="0"/></radialGradient>
+    </defs>
+    <rect width="1600" height="640" fill="url(#wp)"/>
+    <rect width="1600" height="44" fill="#f7c9d6"/>
+    <path d="M0 46 Q800 70 1600 46" fill="none" stroke="#e8a6b9" stroke-width="3"/>
+    ${bunting}
+    <g transform="translate(100 150)">
+      <path d="M0 330 V170 A170 170 0 0 1 340 170 V330 Z" fill="url(#win)" stroke="#fff" stroke-width="16"/>
+      <ellipse cx="110" cy="130" rx="50" ry="18" fill="#fff" opacity=".9"/><ellipse cx="150" cy="118" rx="36" ry="20" fill="#fff" opacity=".9"/>
+      <ellipse cx="250" cy="220" rx="40" ry="14" fill="#fff" opacity=".8"/>
+      <line x1="170" y1="6" x2="170" y2="330" stroke="#fff" stroke-width="10"/>
+      <line x1="0" y1="210" x2="340" y2="210" stroke="#fff" stroke-width="10"/>
+      <rect x="-24" y="326" width="388" height="24" rx="10" fill="#f2c2cf"/>
+      <rect x="40" y="292" width="40" height="36" rx="8" fill="#f7a072"/><circle cx="52" cy="282" r="14" fill="#8cc98a"/><circle cx="70" cy="276" r="14" fill="#a6d8a0"/><circle cx="60" cy="268" r="6" fill="#ff8fab"/>
+      <rect x="260" y="292" width="40" height="36" rx="8" fill="#a8c6f0"/><circle cx="280" cy="274" r="18" fill="#8cc98a"/><circle cx="274" cy="266" r="6" fill="#fff1b8"/><circle cx="288" cy="278" r="6" fill="#fff1b8"/>
+    </g>
+    <g transform="translate(580 230)">${jars}<rect x="0" y="120" width="460" height="16" rx="6" fill="#d4a373"/></g>
+    <g transform="translate(1170 150)">
+      <rect width="320" height="240" rx="18" fill="#6b7f6a" stroke="#d4a373" stroke-width="14"/>
+      <text x="160" y="58" text-anchor="middle" font-family="Jua, sans-serif" font-size="32" fill="#fff">TODAY'S CAKE</text>
+      <text x="40" y="112" font-family="Jua, sans-serif" font-size="25" fill="#ffe9a8">♡ 딸기 쇼트케이크</text>
+      <text x="40" y="156" font-family="Jua, sans-serif" font-size="25" fill="#ffd1df">♡ 몽블랑</text>
+      <text x="40" y="200" font-family="Jua, sans-serif" font-size="25" fill="#cfeac7">♡ 말차 롤케이크</text>
+    </g>
+    ${lamps}
+    <rect y="560" width="1600" height="80" fill="#f8d5df"/>
+    ${Array.from({ length: 33 }, (_, i) => `<line x1="${i * 50}" y1="568" x2="${i * 50}" y2="640" stroke="#f1c2cf" stroke-width="3"/>`).join('')}
+    <rect y="636" width="1600" height="264" fill="url(#fl)"/>
+    <g transform="translate(300 490)">
+      <rect width="1000" height="320" rx="28" fill="#fff" stroke="#f3c2cf" stroke-width="6"/>
+      <rect x="30" y="24" width="940" height="176" rx="18" fill="url(#glass)" stroke="#e8f4f7" stroke-width="4"/>
+      ${cakes}
+      <path d="M60 40 L120 40 L70 110 Z" fill="#fff" opacity=".6"/>
+      <rect x="0" y="214" width="1000" height="106" fill="#ffd9e3"/>
+      ${Array.from({ length: 20 }, (_, i) => `<circle cx="${25 + i * 50}" cy="214" r="25" fill="#fff"/>`).join('')}
+    </g>
+  </svg>`;
+}
+
+function bgStreet() {
+  let flowers = '';
+  for (let i = 0; i < 28; i++) {
+    const x = 20 + i * 58 + (i % 3) * 9, y = 668 + (i % 2) * 18, s = .9 + (i % 3) * .15;
+    const col = i % 4 === 3 ? '#ffb3c8' : (i % 2 ? '#a58be0' : '#9277d6');
+    flowers += `<g transform="translate(${x} ${y}) scale(${s})">
+      <path d="M0 4 Q-4 24 2 44" stroke="#7fb77e" stroke-width="4" fill="none"/>
+      <ellipse cx="-9" cy="30" rx="9" ry="4" fill="#8cc98a" transform="rotate(-30 -9 30)"/>
+      <path d="${starPath(17, 9)}" fill="${col}" stroke="${col}" stroke-width="6" stroke-linejoin="round"/>
+      <circle r="4.5" fill="#fff6c9"/></g>`;
+  }
+  let ivy = '';
+  for (let i = 0; i < 20; i++) {
+    const x = 30 + i * 82, y = 506 + (i % 3) * 6;
+    ivy += `<circle cx="${x}" cy="${y}" r="${18 + (i % 4) * 4}" fill="#a9cf9a"/><circle cx="${x + 18}" cy="${y + 8}" r="${12 + (i % 3) * 3}" fill="#bfe0b0"/>`;
+  }
+  const winsL = Array.from({ length: 18 }, (_, i) => `<rect x="${30 + (i % 6) * 80}" y="${70 + Math.floor(i / 6) * 80}" width="50" height="48" rx="4" fill="#e6e1f2"/>`).join('');
+  const winsR = Array.from({ length: 10 }, (_, i) => `<path d="M${40 + (i % 5) * 96} ${190 + Math.floor(i / 5) * 100} v-40 a24 24 0 0 1 48 0 v40 z" fill="#fde0e7"/>`).join('');
+  return `<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#c7b3f0"/><stop offset=".45" stop-color="#ffb8c6"/><stop offset="1" stop-color="#ffe3c2"/>
+      </linearGradient>
+      <radialGradient id="sunglow"><stop offset="0" stop-color="#fff3c4"/><stop offset="1" stop-color="#fff3c4" stop-opacity="0"/></radialGradient>
+    </defs>
+    <rect width="1600" height="900" fill="url(#sky)"/>
+    <circle cx="800" cy="380" r="260" fill="url(#sunglow)" opacity=".8"/>
+    <circle cx="800" cy="400" r="88" fill="#fff1bf"/>
+    <g fill="#fff" opacity=".75">
+      <ellipse cx="300" cy="140" rx="90" ry="24"/><ellipse cx="360" cy="124" rx="60" ry="26"/>
+      <ellipse cx="1240" cy="110" rx="100" ry="24"/><ellipse cx="1300" cy="96" rx="56" ry="24"/>
+      <ellipse cx="900" cy="200" rx="70" ry="16"/>
+    </g>
+    <g transform="translate(40 230)">
+      <rect x="-10" y="-14" width="520" height="20" rx="6" fill="#8f88a6"/>
+      <rect width="500" height="330" fill="#b9b3c9"/>${winsL}
+      <circle cx="250" cy="30" r="20" fill="#fff" stroke="#8f88a6" stroke-width="5"/>
+      <path d="M250 30 v-12 M250 30 h9" stroke="#8f88a6" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(1060 200)">
+      <path d="M-10 0 L250 -70 L510 0 Z" fill="#f4b6c2"/>
+      <rect x="225" y="-140" width="50" height="80" fill="#fff4ea"/><path d="M215 -140 L250 -180 L285 -140 Z" fill="#f4b6c2"/>
+      <circle cx="250" cy="-104" r="11" fill="#ffd36e"/>
+      <rect width="500" height="360" fill="#fff4ea"/>${winsR}
+    </g>
+    <rect x="0" y="500" width="1600" height="170" fill="#efe3da"/>
+    ${Array.from({ length: 4 }, (_, r) => Array.from({ length: 17 }, (_, i) => `<rect x="${i * 100 + (r % 2) * 50 - 50}" y="${520 + r * 38}" width="96" height="34" rx="4" fill="#f5ebe3"/>`).join('')).join('')}
+    <rect x="-10" y="490" width="1620" height="20" rx="6" fill="#d8c8bd"/>
+    ${ivy}
+    <rect y="700" width="1600" height="200" fill="#f4dccb"/>
+    ${Array.from({ length: 9 }, (_, i) => `<rect x="${i * 200 - 40}" y="800" width="120" height="12" rx="6" fill="#fff" opacity=".6"/>`).join('')}
+    ${flowers}
+  </svg>`;
+}
+
+const BGS = { shop: bgShop, street: bgStreet };
+
+/* =========================================================
+   Cake builder
+   ========================================================= */
+const CAKE = {
+  base: { label: '① 시트', items: [
+    { id: 'vanilla', name: '바닐라', color: '#ffe3a3' },
+    { id: 'choco', name: '초코', color: '#8a5a44' },
+    { id: 'matcha', name: '말차', color: '#b5d39a' },
+  ] },
+  cream: { label: '② 크림', items: [
+    { id: 'fresh', name: '생크림', color: '#fffdf7' },
+    { id: 'chococream', name: '초코 크림', color: '#b77b5f' },
+    { id: 'berrycream', name: '딸기 크림', color: '#ffc8d6' },
+  ] },
+  top: { label: '③ 토핑', items: [
+    { id: 'strawberry', name: '딸기', obj: '딸기를' },
+    { id: 'blueberry', name: '블루베리', obj: '블루베리를' },
+    { id: 'macaron', name: '마카롱', obj: '마카롱을' },
+    { id: 'chocolate', name: '초콜릿', obj: '초콜릿을' },
+  ] },
+};
+const FAV = { base: 'vanilla', cream: 'fresh', top: 'strawberry' };
+const pick = (k, id) => CAKE[k].items.find(it => it.id === id);
+
+function topping(id, x, y, i = 0) {
+  const g = s => `<g transform="translate(${x} ${y})">${s}</g>`;
+  switch (id) {
+    case 'strawberry': return g(`
+      <path d="M-12 -6 Q-12 -14 0 -14 Q12 -14 12 -6 Q10 6 0 14 Q-10 6 -12 -6 Z" fill="#ef4f6c"/>
+      <path d="M-8 -13 L-2 -9 L0 -15 L2 -9 L8 -13 L4 -16 L0 -14 L-4 -16 Z" fill="#6cbf6a"/>
+      <circle cx="-5" cy="-3" r="1.2" fill="#ffe3a0"/><circle cx="4" cy="-1" r="1.2" fill="#ffe3a0"/><circle cx="-1" cy="5" r="1.2" fill="#ffe3a0"/>
+      <ellipse cx="-6" cy="-8" rx="3" ry="2" fill="#fff" opacity=".5"/>`);
+    case 'blueberry': return g(`
+      <circle cx="-7" cy="2" r="7" fill="#4f5fae"/><circle cx="7" cy="2" r="7" fill="#5a6cc0"/><circle cx="0" cy="-7" r="7" fill="#4a58a3"/>
+      <circle cx="-2" cy="-10" r="2" fill="#fff" opacity=".6"/><circle cx="5" cy="-1" r="2" fill="#fff" opacity=".5"/>`);
+    case 'macaron': {
+      const c = ['#ffb3c8', '#c9b6f0', '#bfe6c8'][i % 3];
+      return g(`<ellipse cy="-5" rx="13" ry="5.5" fill="${c}"/><rect x="-12" y="-4" width="24" height="4.5" rx="2" fill="#fff6e8"/><ellipse cy="3" rx="13" ry="5.5" fill="${c}"/>`);
+    }
+    case 'chocolate': return g(`<g transform="rotate(${i % 2 ? 14 : -14})">
+      <rect x="-14" y="-10" width="28" height="19" rx="3" fill="#6b3f2e"/>
+      <rect x="-11" y="-7" width="10" height="6" rx="1.5" fill="#85503b"/><rect x="1" y="-7" width="10" height="6" rx="1.5" fill="#85503b"/>
+      <rect x="-11" y="1" width="10" height="5" rx="1.5" fill="#85503b"/><rect x="1" y="1" width="10" height="5" rx="1.5" fill="#85503b"/></g>`);
+  }
+  return '';
+}
+
+function cakeSVG(c) {
+  const b = c.base && pick('base', c.base), cr = c.cream && pick('cream', c.cream), t = c.top;
+  let s = `<svg viewBox="0 0 300 260" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="150" cy="222" rx="125" ry="24" fill="#fff" stroke="#f6c6d4" stroke-width="4"/>
+    <ellipse cx="150" cy="220" rx="100" ry="16" fill="none" stroke="#fde3ea" stroke-width="3"/>`;
+  if (!b) {
+    s += `<path d="M60 100 V200 A90 18 0 0 0 240 200 V100" fill="none" stroke="#f2a7bd" stroke-width="3" stroke-dasharray="8 8"/>
+          <ellipse cx="150" cy="100" rx="90" ry="18" fill="none" stroke="#f2a7bd" stroke-width="3" stroke-dasharray="8 8"/>
+          <text x="150" y="168" text-anchor="middle" font-family="Jua, sans-serif" font-size="44" fill="#f2a7bd">?</text>`;
+    return s + '</svg>';
+  }
+  const edge = x => 100 + 18 * Math.sqrt(Math.max(0, 1 - ((x - 150) / 90) ** 2));
+  s += `<path d="M60 100 V200 A90 18 0 0 0 240 200 V100 Z" fill="${b.color}" stroke="rgba(122,82,70,.22)" stroke-width="2"/>
+        <path d="M70 108 V196" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".25"/>`;
+  const mid = cr ? cr.color : 'rgba(255,255,255,.45)';
+  s += `<path d="M60 146 A90 18 0 0 0 240 146 V160 A90 18 0 0 1 60 160 Z" fill="${mid}"/>`;
+  if (cr) {
+    s += `<ellipse cx="150" cy="100" rx="90" ry="18" fill="${cr.color}" stroke="rgba(122,82,70,.15)" stroke-width="2"/>`;
+    [18, 28, 14, 24, 32, 16, 26, 20, 14].forEach((h, i) => {
+      const x = 68 + i * 20;
+      s += `<rect x="${x - 7}" y="${edge(x) - 8}" width="15" height="${h}" rx="7.5" fill="${cr.color}"/>`;
+    });
+  } else {
+    s += `<ellipse cx="150" cy="100" rx="90" ry="18" fill="${b.color}" stroke="rgba(122,82,70,.22)" stroke-width="2"/>
+          <ellipse cx="150" cy="100" rx="70" ry="12" fill="#fff" opacity=".18"/>`;
+  }
+  if (t) [[112, 94], [150, 88], [188, 94], [130, 106], [170, 106]].forEach(([x, y], i) => { s += topping(t, x, y, i); });
+  return s + '</svg>';
+}
+
+function cakeName() {
+  const c = S.cake;
+  if (!c.base || !c.cream || !c.top) return '케이크';
+  return `${pick('base', c.base).name} 시트에 ${pick('cream', c.cream).name}을 바르고 ${pick('top', c.top).obj} 올린 케이크`;
+}
+
+function renderCakeUI(popped) {
+  const prev = $('#cakePreview');
+  prev.innerHTML = cakeSVG(S.cake);
+  if (popped) prev.firstChild.classList.add('pop');
+  const c = S.cake;
+  $('#cakeLabel').textContent = [c.base && pick('base', c.base).name + ' 시트', c.cream && pick('cream', c.cream).name, c.top && pick('top', c.top).name].filter(Boolean).join(' + ') || '재료를 골라 주세요';
+  $('#cakeOpts').innerHTML = Object.entries(CAKE).map(([k, g]) => `
+    <div class="opt-group"><h3>${g.label}</h3><div class="chips">
+      ${g.items.map(it => `<button class="chip ${c[k] === it.id ? 'on' : ''}" data-k="${k}" data-id="${it.id}">
+        ${k === 'top' ? `<svg viewBox="-16 -16 32 32">${topping(it.id, 0, 0)}</svg>` : `<span class="sw" style="background:${it.color}"></span>`}
+        ${it.name}</button>`).join('')}
+    </div></div>`).join('');
+  $('#cakeDone').disabled = !(c.base && c.cream && c.top);
+}
+
+$('#cakeOpts').addEventListener('click', ev => {
+  const b = ev.target.closest('.chip');
+  if (!b) return;
+  S.cake[b.dataset.k] = b.dataset.id;
+  renderCakeUI(true);
+});
+$('#cakeDone').addEventListener('click', () => {
+  S.cakeScore = Object.keys(FAV).filter(k => S.cake[k] === FAV[k]).length;
+  $('#cakeScr').hidden = true;
+  $('#box').hidden = false;
+  S.i++; run();
+});
+
+/* =========================================================
+   Script
+   ========================================================= */
+const L = label => ({ label });
+const BG = bg => ({ bg });
+const SHOW = show => ({ show });
+const HIDE = () => ({ hide: true });
+const N = t => ({ who: null, t });
+const R = (e, t) => ({ who: 'rin', e, t });
+const K = (e, t) => ({ who: 'kao', e, t });
+const Q = (prompt, opts) => ({ prompt, choice: opts });
+const GO = go => ({ go });
+const BR = branch => ({ branch });
+const PTS = (k, r) => ({ pts: [k, r] });
+
+const SCRIPT = [
+  L('start'),
+  BG('street'),
+  N('치도리 고등학교와 키쿄 여자고등학교.\n담장 하나를 사이에 두고 마주한 두 학교는, 사이가 나쁘기로 유명하다.'),
+  N('그리고 그 담장 가까이에… 작은 케이크 가게가 하나 있다.'),
+  N('오늘은 {name}의 첫 아르바이트 날.'),
+  BG('shop'),
+  N('딸랑— 문을 열자 달콤한 버터 냄새가 확 풍겨 온다.'),
+  SHOW({ rin: ['normal', 'center'] }),
+  R('normal', '……어서 와.'),
+  N('카운터 너머에서 금발 머리의 키 큰 남자애가 이쪽을 내려다본다.\n피어싱에 날카로운 눈매… 솔직히 조금 무섭다.'),
+  Q('어떻게 인사할까?', [
+    { t: '(살짝 겁먹으며) 아, 안녕하세요…!', go: 'c1a' },
+    { t: '(활짝 웃으며) 오늘부터 잘 부탁드려요!', r: 1, go: 'c1b' },
+  ]),
+  L('c1a'),
+  R('troubled', '아… 미안. 놀랐지? 얼굴이 원래 이래서.'),
+  R('smile', '난 츠무기 린타로. 여기, 우리 집 가게야. 편하게 해도 돼.'),
+  GO('c1end'),
+  L('c1b'),
+  R('surprised', '어…? 아, 응. 나야말로 잘 부탁해.'),
+  R('blush', '처음 보면 다들 좀 겁먹던데… 고마워.'),
+  R('smile', '난 츠무기 린타로. 여기, 우리 집 가게야.'),
+  L('c1end'),
+  R('normal', '오늘은 쇼케이스 정리랑 손님 응대를 같이 해 보자.'),
+  N('린타로는 케이크를 보석 다루듯 조심조심 옮긴다.\n커다란 손이 의외로 섬세하다.'),
+  Q('뭐라고 말을 걸어 볼까?', [
+    { t: '케이크 다루는 손길이 엄청 섬세하네요!', r: 1, go: 'c2a' },
+    { t: '이 케이크들, 전부 직접 만드는 거예요?', go: 'c2b' },
+  ]),
+  L('c2a'),
+  R('blush', '…그런 말은 처음 들어 봐.'),
+  R('smile', '어릴 때부터 계속 가게 일을 도와서 그런가 봐.'),
+  GO('c2end'),
+  L('c2b'),
+  R('smile', '응. 주로 엄마가 만들고, 나도 조금씩 도와.'),
+  R('normal', '아직 한참 멀었지만.'),
+  L('c2end'),
+  N('딸랑— 문에 달린 종이 맑게 울렸다.'),
+  SHOW({ rin: ['surprised', 'left'], kao: ['smile', 'right'] }),
+  K('smile', '안녕하세요! 오늘도 왔어요, 린타로 군!'),
+  N('단정한 키쿄 여고 교복에 반짝반짝 빛나는 눈.\n손님은 쇼케이스를 향해 곧장 다가왔다.'),
+  R('blush', '와, 와구리 씨. 어서 와.'),
+  K('surprised', '어라? 처음 뵙는 분이네요?'),
+  Q(null, [
+    { t: '저는 {name}! 오늘부터 여기서 일하게 됐어요!', k: 1, go: 'c3a' },
+    { t: '(린타로를 힐끗 보며) 두 분, 친한 사이인가 봐요?', k: 1, go: 'c3b' },
+  ]),
+  L('c3b'),
+  K('blush', '에헤헤… 네! 소중한 친구예요.'),
+  R('blush', '……'),
+  N('린타로의 귀가 새빨개졌다.'),
+  L('c3a'),
+  K('smile', '와구리 카오루코예요. 이 가게 케이크의 열렬한 팬이랍니다!'),
+  K('happy', '잘 부탁해요, {name} 씨!'),
+  R('normal', '참, 와구리 씨. 부탁이 하나 있는데…'),
+  R('smile', '신메뉴 시식을 해 줄 수 있을까? 오늘은 {name} 씨가 처음으로 케이크를 만들어 볼 거거든.'),
+  K('surprised', '시식이요?! 정말요?!'),
+  K('happy', '기꺼이요! 아니, 꼭 하게 해 주세요!!'),
+  N('눈이 반짝반짝… 아니, 거의 빛나고 있다.'),
+  Q('케이크를 만들기 전에…', [
+    { t: '와구리 씨는 어떤 케이크를 좋아하세요?', k: 1, go: 'hA' },
+    { t: '린타로 군, 와구리 씨 취향 알아요?', k: 1, r: 1, go: 'hB' },
+    { t: '비밀이에요! 기대해 주세요.', go: 'hC' },
+  ]),
+  L('hA'),
+  K('smile', '전부 좋아해요!'),
+  K('blush', '…그래도 굳이 고르자면, 폭신폭신한 바닐라 시트에 새하얀 생크림.\n그리고 맨 위에 새빨간 딸기! 그게 최고예요.'),
+  GO('hEnd'),
+  L('hB'),
+  R('blush', '어? 아, 그게…'),
+  R('normal', '딸기 쇼트케이크 먹을 때가 제일 행복해 보였어.\n생크림이랑, 폭신한 바닐라 시트.'),
+  K('surprised', '그, 그걸 기억하고 있었어요?!'),
+  K('blush', '…부끄럽지만, 정답이에요.'),
+  GO('hEnd'),
+  L('hC'),
+  K('happy', '와아, 두근두근해요! 케이크라면 뭐든 좋아하니까요!'),
+  N('옆에서 린타로가 작게 중얼거렸다.'),
+  R('normal', '(…딸기, 좋아하는데.)'),
+  L('hEnd'),
+  R('smile', '좋아. 그럼 주방으로 가자, {name} 씨.'),
+  { cake: true },
+  N('완성된 건 {cakeName}.'),
+  BR(s => s.cakeScore >= 3 ? 'kBest' : s.cakeScore === 2 ? 'kGood' : 'kOdd'),
+  L('kBest'), PTS(2, 0),
+  K('surprised', '이건…!'),
+  K('happy', '잘 먹겠습니다!'),
+  N('한 입. 그리고, 정적.'),
+  K('happy', '………최고예요. 정말, 정말로 최고예요!!'),
+  R('smile', '완벽한 조합이네. 처음인데 대단해, {name} 씨.'),
+  GO('kEnd'),
+  L('kGood'), PTS(1, 0),
+  K('happy', '음~! 맛있어요! 폭신하고, 달콤하고…'),
+  K('smile', '{name} 씨의 정성이 느껴지는 맛이에요!'),
+  R('smile', '처음치고 꽤 잘했는데?'),
+  GO('kEnd'),
+  L('kOdd'),
+  K('surprised', '오오… 처음 먹어 보는 조합이에요!'),
+  K('happy', '그치만 맛있어요! 새로운 발견이에요!'),
+  R('smile', '와구리 씨는 정말 뭐든 맛있게 먹는다니까.'),
+  N('조금 엉뚱한 케이크였지만, 행복하게 먹는 얼굴을 보니 마음이 따뜻해졌다.'),
+  L('kEnd'),
+  HIDE(),
+  BG('street'),
+  N('해 질 무렵.\n가게 일을 마치고, 카오루코를 배웅하러 담장 앞까지 함께 나왔다.'),
+  SHOW({ rin: ['normal', 'left'], kao: ['smile', 'right'] }),
+  K('smile', '오늘 정말 즐거웠어요. 케이크도, 이야기도.'),
+  K('normal', '있잖아요, {name} 씨.\n처음에 린타로 군 보고, 조금 무섭다고 생각하지 않았어요?'),
+  Q(null, [
+    { t: '솔직히… 조금요.', k: 1, go: 'eA' },
+    { t: '아뇨, 처음부터 상냥해 보였어요!', r: 1, go: 'eB' },
+  ]),
+  L('eA'),
+  K('smile', '후후, 다들 그렇게 말해요.'),
+  K('normal', '그치만 린타로 군은 누구보다 상냥한 사람이에요.\n겉모습만 봐서는 절대 모르죠.'),
+  R('blush', '와구리 씨…'),
+  GO('eEnd'),
+  L('eB'),
+  R('surprised', '…진짜?'),
+  K('happy', '역시! 알아봐 주는 사람이 있어서 기뻐요.'),
+  R('blush', '둘 다… 그만해. 부끄러우니까.'),
+  L('eEnd'),
+  K('normal', '치도리랑 키쿄는 담장 하나 사이인데도, 서로를 잘 모르잖아요.'),
+  K('smile', '그래도 이렇게 같은 케이크를 먹고, 같이 웃을 수 있어요.'),
+  R('smile', '…응. 담장 같은 건, 생각보다 별거 아닐지도 몰라.'),
+  N('노을빛 속에서, 담장 아래 도라지꽃이 바람에 살랑 흔들렸다.'),
+  BR(s => s.k + s.r >= 6 ? 'endBest' : s.k + s.r >= 3 ? 'endGood' : 'endSweet'),
+  L('endBest'),
+  K('happy', '{name} 씨, 다음에도 또 케이크 만들어 줄 거죠? 약속이에요!'),
+  R('smile', '다음엔 셋이서 같이 신메뉴 만들어 보자.'),
+  { ending: 'best' },
+  L('endGood'),
+  K('smile', '또 올게요! 다음엔 어떤 케이크가 있을지 기대돼요.'),
+  R('smile', '수고했어, {name} 씨. 내일도 잘 부탁해.'),
+  { ending: 'good' },
+  L('endSweet'),
+  R('normal', '처음이라 힘들었지? 나도 처음엔 크림 엄청 망쳤어.'),
+  K('smile', '다음엔 분명 더 맛있을 거예요. 응원할게요!'),
+  { ending: 'sweet' },
+];
+const LABELS = {};
+SCRIPT.forEach((st, i) => { if ('label' in st) LABELS[st.label] = i; });
+
+const ENDINGS = {
+  best: { emoji: '🌸', title: '늠름하게 핀 꽃', desc: '두 사람의 마음을 케이크로 이어 준 최고의 첫날.\n당신은 이제 이 가게의 소중한 동료예요.' },
+  good: { emoji: '🍰', title: '달콤한 하루', desc: '맛있는 케이크와 따뜻한 대화가 있던 하루.\n내일은 또 어떤 손님이 찾아올까요?' },
+  sweet: { emoji: '🍓', title: '조금 서툰 첫날', desc: '조금 서툴렀지만, 그래도 달콤했던 첫날.\n다음엔 분명 더 잘할 수 있을 거예요.' },
+};
+
+/* =========================================================
+   Engine
+   ========================================================= */
+const fresh = () => ({ i: 0, name: '하나', k: 0, r: 0, cake: {}, cakeScore: 0, bg: null, chars: {}, log: [] });
+let S = fresh();
+let playing = false, auto = false, typing = null, fullText = '', autoTimer = null, curBg = null;
+
+const sub = t => t.replace(/\{name\}/g, S.name).replace(/\{cakeName\}/g, cakeName());
+
+function setBg(name) {
+  if (name === curBg) return;
+  curBg = name;
+  const el = $('#bg');
+  el.classList.add('fade');
+  setTimeout(() => { el.innerHTML = BGS[name](); el.classList.remove('fade'); }, 350);
+}
+
+function renderChars() {
+  const layer = $('#chars');
+  for (const el of [...layer.children]) {
+    if (!S.chars[el.dataset.id] && !el.classList.contains('out')) {
+      el.classList.add('out');
+      setTimeout(() => el.remove(), 360);
+    }
+  }
+  for (const [id, c] of Object.entries(S.chars)) {
+    let el = layer.querySelector(`[data-id="${id}"]:not(.out)`);
+    if (!el) {
+      el = document.createElement('div');
+      el.className = `char ${id} enter`;
+      el.dataset.id = id;
+      layer.appendChild(el);
+    }
+    el.classList.remove('pos-left', 'pos-center', 'pos-right');
+    el.classList.add('pos-' + c.p);
+    if (el.dataset.e !== c.e) {
+      const had = !!el.dataset.e;
+      el.innerHTML = CHARS[id].draw(c.e);
+      el.dataset.e = c.e;
+      if (had) { el.classList.remove('hop'); void el.offsetWidth; el.classList.add('hop'); }
+    }
+  }
+}
+
+function setSpeaker(who) {
+  const tag = $('#nameTag');
+  if (who) {
+    tag.hidden = false;
+    tag.textContent = CHARS[who].name;
+    tag.style.background = CHARS[who].color;
+  } else tag.hidden = true;
+  $('#text').classList.toggle('narr', !who);
+  for (const el of $('#chars').children) el.classList.toggle('dim', !!who && el.dataset.id !== who);
+}
+
+function typeText(t) {
+  fullText = t;
+  let n = 0;
+  const el = $('#text');
+  el.textContent = '';
+  $('#next').hidden = true;
+  clearInterval(typing);
+  typing = setInterval(() => {
+    n++;
+    el.textContent = fullText.slice(0, n);
+    if (n >= fullText.length) finishType();
+  }, 28);
+}
+
+function finishType() {
+  clearInterval(typing);
+  typing = null;
+  $('#text').textContent = fullText;
+  $('#next').hidden = false;
+  if (auto) autoTimer = setTimeout(advance, 1300 + fullText.length * 25);
+}
+
+function say(st) {
+  if (st.who && S.chars[st.who] && st.e) { S.chars[st.who].e = st.e; renderChars(); }
+  setSpeaker(st.who);
+  const t = sub(st.t);
+  S.log.push({ who: st.who, t });
+  if (S.log.length > 80) S.log.shift();
+  typeText(t);
+}
+
+function choose(st) {
+  if (st.prompt) { setSpeaker(null); typeText(st.prompt); }
+  $('#next').hidden = true;
+  const box = $('#choices');
+  box.innerHTML = '';
+  st.choice.forEach(o => {
+    const b = document.createElement('button');
+    b.className = 'choice';
+    b.textContent = sub(o.t);
+    b.onclick = ev => {
+      ev.stopPropagation();
+      box.hidden = true;
+      S.log.push({ who: 'me', t: sub(o.t) });
+      addPts(o.k || 0, o.r || 0);
+      S.i = o.go ? LABELS[o.go] : S.i + 1;
+      run();
+    };
+    box.appendChild(b);
+  });
+  box.hidden = false;
+}
+
+function addPts(k, r) {
+  S.k += k; S.r += r;
+  const pops = [];
+  if (k) pops.push([`💗 카오루코 +${k}`, CHARS.kao.color]);
+  if (r) pops.push([`⭐ 린타로 +${r}`, CHARS.rin.color]);
+  pops.forEach(([txt, col], i) => setTimeout(() => {
+    const p = document.createElement('div');
+    p.className = 'pop';
+    p.textContent = txt;
+    p.style.color = col;
+    $('#pops').appendChild(p);
+    setTimeout(() => p.remove(), 1700);
+  }, i * 380));
+}
+
+function save() {
+  store.set(SAVE_KEY, { i: S.i, name: S.name, k: S.k, r: S.r, cake: S.cake, cakeScore: S.cakeScore, bg: S.bg, chars: S.chars, log: S.log.slice(-40) });
+}
+
+function run() {
+  clearTimeout(autoTimer);
+  while (S.i < SCRIPT.length) {
+    const st = SCRIPT[S.i];
+    if ('label' in st) { S.i++; continue; }
+    if (st.bg) { S.bg = st.bg; setBg(st.bg); S.i++; continue; }
+    if (st.show) {
+      for (const [id, [e, p]] of Object.entries(st.show)) S.chars[id] = { e, p };
+      renderChars(); S.i++; continue;
+    }
+    if (st.hide) { S.chars = {}; renderChars(); S.i++; continue; }
+    if (st.pts) { addPts(...st.pts); S.i++; continue; }
+    if (st.go) { S.i = LABELS[st.go]; continue; }
+    if (st.branch) { S.i = LABELS[st.branch(S)]; continue; }
+    save();
+    if ('t' in st) return say(st);
+    if (st.choice) return choose(st);
+    if (st.cake) return openCake();
+    if (st.ending) return showEnding(st.ending);
+    S.i++;
+  }
+}
+
+function busy() {
+  return !playing || !$('#choices').hidden || !$('#cakeScr').hidden || !$('#logScr').hidden || !$('#endScr').hidden || !$('#nameScr').hidden;
+}
+
+function advance() {
+  if (busy()) return;
+  clearTimeout(autoTimer);
+  if (typing) return finishType();
+  S.i++;
+  run();
+}
+
+function openCake() {
+  $('#box').hidden = true;
+  setSpeaker(null);
+  renderCakeUI();
+  $('#cakeScr').hidden = false;
+}
+
+function endings() { return store.get(END_KEY) || []; }
+
+function badgesHTML() {
+  const got = endings();
+  return Object.entries(ENDINGS).map(([id, e]) => `<span class="badge ${got.includes(id) ? 'got' : ''}" title="${got.includes(id) ? e.title : '???'}">${e.emoji}</span>`).join('')
+    + `<span>엔딩 ${got.length}/3</span>`;
+}
+
+function showEnding(id) {
+  const e = ENDINGS[id];
+  const got = endings();
+  if (!got.includes(id)) { got.push(id); store.set(END_KEY, got); }
+  store.del(SAVE_KEY);
+  $('#endEmoji').textContent = e.emoji;
+  $('#endTitle').textContent = e.title;
+  $('#endDesc').textContent = e.desc;
+  $('#endStats').textContent = `💗 카오루코 ${S.k} · ⭐ 린타로 ${S.r}`;
+  $('#endBadges').innerHTML = badgesHTML();
+  $('#box').hidden = true;
+  $('#endScr').hidden = false;
+}
+
+function enterGame() {
+  playing = true;
+  ['#titleScr', '#nameScr', '#endScr', '#cakeScr', '#logScr', '#choices'].forEach(s => $(s).hidden = true);
+  $('#box').hidden = false;
+  $('#hud').hidden = false;
+  $('#text').textContent = '';
+}
+
+function newGame(name) {
+  S = fresh();
+  S.name = name;
+  curBg = null;
+  $('#chars').innerHTML = '';
+  enterGame();
+  run();
+}
+
+function continueGame() {
+  const sv = store.get(SAVE_KEY);
+  if (!sv) return;
+  S = Object.assign(fresh(), sv);
+  curBg = null;
+  $('#chars').innerHTML = '';
+  enterGame();
+  if (S.bg) setBg(S.bg);
+  renderChars();
+  run();
+}
+
+function toTitle() {
+  playing = false;
+  clearInterval(typing); typing = null;
+  clearTimeout(autoTimer);
+  ['#box', '#hud', '#choices', '#cakeScr', '#logScr', '#endScr', '#nameScr'].forEach(s => $(s).hidden = true);
+  $('#titleScr').hidden = false;
+  $('#continueBtn').disabled = !store.get(SAVE_KEY);
+  $('#titleBadges').innerHTML = badgesHTML();
+}
+
+/* ---------- wiring ---------- */
+$('#box').addEventListener('click', advance);
+$('#clickLayer').addEventListener('click', advance);
+document.addEventListener('keydown', ev => {
+  if (ev.target.tagName === 'INPUT') return;
+  if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); advance(); }
+});
+
+$('#startBtn').onclick = () => { $('#nameScr').hidden = false; $('#nameInput').value = ''; setTimeout(() => $('#nameInput').focus(), 50); };
+$('#continueBtn').onclick = continueGame;
+$('#nameOk').onclick = () => newGame($('#nameInput').value.trim() || '하나');
+$('#nameInput').addEventListener('keydown', ev => { if (ev.key === 'Enter') $('#nameOk').click(); });
+
+$('#logBtn').onclick = ev => {
+  ev.stopPropagation();
+  $('#logList').innerHTML = '';
+  S.log.forEach(l => {
+    const d = document.createElement('div');
+    d.className = 'log-item ' + (l.who === 'me' ? 'me' : l.who ? '' : 'narr');
+    if (l.who) {
+      const b = document.createElement('b');
+      b.textContent = l.who === 'me' ? S.name : CHARS[l.who].name;
+      if (l.who !== 'me') b.style.color = CHARS[l.who].color;
+      d.appendChild(b);
+    }
+    d.appendChild(document.createTextNode(l.t));
+    $('#logList').appendChild(d);
+  });
+  $('#logScr').hidden = false;
+  const card = $('#logScr .card');
+  card.scrollTop = card.scrollHeight;
+};
+$('#logClose').onclick = () => { $('#logScr').hidden = true; };
+$('#autoBtn').onclick = ev => {
+  ev.stopPropagation();
+  auto = !auto;
+  $('#autoBtn').classList.toggle('on', auto);
+  if (auto && !typing && !busy()) autoTimer = setTimeout(advance, 800);
+  if (!auto) clearTimeout(autoTimer);
+};
+$('#titleBtn').onclick = ev => { ev.stopPropagation(); toTitle(); };
+$('#againBtn').onclick = () => newGame(S.name);
+$('#endTitleBtn').onclick = toTitle;
+
+/* ---------- decor ---------- */
+$('#titleCake').innerHTML = cakeSVG(FAV);
+for (let i = 0; i < 16; i++) {
+  const p = document.createElement('span');
+  p.className = 'petal';
+  p.style.left = Math.random() * 100 + '%';
+  p.style.setProperty('--dx', (Math.random() * 160 - 80) + 'px');
+  p.style.animationDuration = (9 + Math.random() * 9) + 's';
+  p.style.animationDelay = (-Math.random() * 18) + 's';
+  if (i % 3 === 0) p.style.background = '#ffe0ea';
+  if (i % 5 === 0) p.style.background = '#d8c8f5';
+  $('#petals').appendChild(p);
+}
+toTitle();
+</script>
+</body>
+</html>
