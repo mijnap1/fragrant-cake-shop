@@ -138,13 +138,26 @@ const ROOTS = 'M67 92 Q69 76 74.4 74.2 L78.6 69 L83.4 73.2 L88.6 67.4 L93.6 72.2
 
 /* ---------- outfit ---------- */
 
-/** White shirt and the shop's apron, with a little cake on the pocket. */
-function ShopApron() {
+/**
+ * White shirt and the shop's apron, with a little cake on the pocket.
+ * The shirt's sides are his hanging arms; with `raised`, his left arm (viewer's right)
+ * is left off so the raised arm can be drawn instead.
+ */
+function ShopApron({ raised = false }: { raised?: boolean }) {
   return (
     <g>
-      <Inked d={['M12 410 Q10 240 16 214 Q20 194 42 188 Q66 182 86 176 L114 176 Q134 182 158 188 Q180 194 184 214 Q190 240 188 410 Z']} fill={SHIRT} ink={SHIRT_INK} w={2} />
-      <path d="M34 200 Q26 290 30 410 M166 200 Q174 290 170 410" {...line(SHIRT_INK, 1.4)} />
-      <path d="M20 250 Q24 300 20 360 M180 250 Q176 300 180 360" {...line('#e6e0de', 2)} />
+      <Inked
+        d={[
+          raised
+            ? 'M12 410 Q10 240 16 214 Q20 194 42 188 Q66 182 86 176 L114 176 Q134 182 158 188 Q166 192 167 204 Q174 290 170 410 Z'
+            : 'M12 410 Q10 240 16 214 Q20 194 42 188 Q66 182 86 176 L114 176 Q134 182 158 188 Q180 194 184 214 Q190 240 188 410 Z',
+        ]}
+        fill={SHIRT}
+        ink={SHIRT_INK}
+        w={2}
+      />
+      <path d={raised ? 'M34 200 Q26 290 30 410' : 'M34 200 Q26 290 30 410 M166 200 Q174 290 170 410'} {...line(SHIRT_INK, 1.4)} />
+      <path d={raised ? 'M20 250 Q24 300 20 360' : 'M20 250 Q24 300 20 360 M180 250 Q176 300 180 360'} {...line('#e6e0de', 2)} />
       {/* open band collar */}
       <path d="M90 172 L100 198 L110 172 Z" fill={SKIN_SHADE} />
       <Mirror>
@@ -211,7 +224,7 @@ export function Rintaro({ e, blink, talk }: SpriteProps) {
         <g transform="translate(0 -12)">
           <path d="M86 138 L84 192 L116 192 L114 138 Z" fill={SKIN_SHADE} stroke={SKIN_INK} strokeWidth={1.2} />
           <path d="M91 160 Q93 170 87 186 M109 160 Q107 170 113 186 M98 168 Q100 171 102 168" {...line(SKIN_INK, 0.8)} opacity={0.6} />
-          <ShopApron />
+          <ShopApron raised={scratch} />
         {/* scratching the back of his head: the hand is hidden behind his hair */}
         {scratch && (
           <g>
