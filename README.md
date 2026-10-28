@@ -206,17 +206,17 @@ Four hand-coded SVG scenes in `src/backgrounds/`:
 
 | Path | What |
 |---|---|
-| `src/story/chapter1.ts` | 📜 The script: every line in `ko` + `en` + `ja`, choices, branches, endings |
-| `src/story/cake.ts` | 🎂 Cake ingredients, Kaoruko's favourite, minigame scoring and Rintaro's tips |
-| `src/story/cast.ts` | 👥 Character names & colours, ending titles |
-| `src/engine/` | ⚙️ Story reducer, saving, typewriter, settings |
-| `src/characters/` | 👩‍🎨 SVG sprites: `Rintaro.tsx`, `Kaoruko.tsx`, shared drawing helpers in `parts.tsx`, blinking & talking in `CharacterSprite.tsx` |
-| `src/backgrounds/` | 🏙️ SVG scenes: street (day & sunset), shop front, shop |
-| `src/components/` | 🧩 Dialogue box, choices, cake minigame (`CakeBuilder.tsx`, `Cake.tsx`), title & ending screens |
-| `src/audio/` | 🎵 Web Audio synth (`audio.ts`) and the songs (`tracks.ts`) |
-| `src/i18n.tsx` | 🌏 UI strings and the language switch |
-| `docs/` | 📸 Images for this README |
-| `legacy/index.html` | 🗃️ The original single-file draft |
+| `src/story/chapter1.ts` | The script: every line in `ko` + `en` + `ja`, choices, branches, endings |
+| `src/story/cake.ts` | Cake ingredients, Kaoruko's favourite, minigame scoring and Rintaro's tips |
+| `src/story/cast.ts` | Character names & colours, ending titles |
+| `src/engine/` | Story reducer, saving, typewriter, settings |
+| `src/characters/` | SVG sprites: `Rintaro.tsx`, `Kaoruko.tsx`, shared drawing helpers in `parts.tsx`, blinking & talking in `CharacterSprite.tsx` |
+| `src/backgrounds/` | SVG scenes: street (day & sunset), shop front, shop |
+| `src/components/` | Dialogue box, choices, cake minigame (`CakeBuilder.tsx`, `Cake.tsx`), title & ending screens |
+| `src/audio/` | Web Audio synth (`audio.ts`) and the songs (`tracks.ts`) |
+| `src/i18n.tsx` | UI strings and the language switch |
+| `docs/` | Images for this README |
+| `legacy/index.html` | The original single-file draft |
 
 ## ✍️ Writing story
 
