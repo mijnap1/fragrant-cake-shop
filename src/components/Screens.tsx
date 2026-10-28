@@ -18,7 +18,7 @@ import { SoundIcon } from './SoundIcon';
 
 export function LangToggle() {
   const { lang, setLang } = useLang();
-  const opts: [Lang, string][] = [['ko', '한국어'], ['en', 'English']];
+  const opts: [Lang, string][] = [['ko', '한국어'], ['en', 'English'], ['ja', '日本語']];
   return (
     <div className="seg" role="radiogroup">
       {opts.map(([l, label]) => (

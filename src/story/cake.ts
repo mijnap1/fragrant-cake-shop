@@ -14,24 +14,24 @@ export interface CakeItem {
 export const CAKE: Record<CakePart, { items: CakeItem[] }> = {
   base: {
     items: [
-      { id: 'vanilla', name: { ko: '바닐라', en: 'Vanilla' }, phrase: 'vanilla', color: '#ffe3a3' },
-      { id: 'choco', name: { ko: '초코', en: 'Chocolate' }, phrase: 'chocolate', color: '#8a5a44' },
-      { id: 'matcha', name: { ko: '말차', en: 'Matcha' }, phrase: 'matcha', color: '#b5d39a' },
+      { id: 'vanilla', name: { ko: '바닐라', en: 'Vanilla', ja: 'バニラ' }, phrase: 'vanilla', color: '#ffe3a3' },
+      { id: 'choco', name: { ko: '초코', en: 'Chocolate', ja: 'チョコ' }, phrase: 'chocolate', color: '#8a5a44' },
+      { id: 'matcha', name: { ko: '말차', en: 'Matcha', ja: '抹茶' }, phrase: 'matcha', color: '#b5d39a' },
     ],
   },
   cream: {
     items: [
-      { id: 'fresh', name: { ko: '생크림', en: 'Fresh cream' }, phrase: 'fresh cream', color: '#fffdf7' },
-      { id: 'chococream', name: { ko: '초코 크림', en: 'Choco cream' }, phrase: 'chocolate cream', color: '#b77b5f' },
-      { id: 'berrycream', name: { ko: '딸기 크림', en: 'Berry cream' }, phrase: 'strawberry cream', color: '#ffc8d6' },
+      { id: 'fresh', name: { ko: '생크림', en: 'Fresh cream', ja: '生クリーム' }, phrase: 'fresh cream', color: '#fffdf7' },
+      { id: 'chococream', name: { ko: '초코 크림', en: 'Choco cream', ja: 'チョコクリーム' }, phrase: 'chocolate cream', color: '#b77b5f' },
+      { id: 'berrycream', name: { ko: '딸기 크림', en: 'Berry cream', ja: 'いちごクリーム' }, phrase: 'strawberry cream', color: '#ffc8d6' },
     ],
   },
   top: {
     items: [
-      { id: 'strawberry', name: { ko: '딸기', en: 'Strawberry' }, phrase: 'strawberries' },
-      { id: 'blueberry', name: { ko: '블루베리', en: 'Blueberry' }, phrase: 'blueberries' },
-      { id: 'macaron', name: { ko: '마카롱', en: 'Macaron' }, phrase: 'macarons' },
-      { id: 'chocolate', name: { ko: '초콜릿', en: 'Chocolate' }, phrase: 'chocolate' },
+      { id: 'strawberry', name: { ko: '딸기', en: 'Strawberry', ja: 'いちご' }, phrase: 'strawberries' },
+      { id: 'blueberry', name: { ko: '블루베리', en: 'Blueberry', ja: 'ブルーベリー' }, phrase: 'blueberries' },
+      { id: 'macaron', name: { ko: '마카롱', en: 'Macaron', ja: 'マカロン' }, phrase: 'macarons' },
+      { id: 'chocolate', name: { ko: '초콜릿', en: 'Chocolate', ja: 'チョコレート' }, phrase: 'chocolate' },
     ],
   },
 };
@@ -90,34 +90,34 @@ export function cakeStars(bake: Bake, frost: Frost, decor: Decor[]) {
 
 /** Rintaro's reactions while you work. */
 export const CAKE_LINES = {
-  base: { ko: '와구리 씨가 좋아하는 걸 떠올려 봐.', en: 'Think about what Waguri-san likes.' },
-  bake: { ko: '노릇노릇해지는 순간에 꺼내는 거야. 바늘이 금색 칸에 왔을 때!', en: 'Take it out the moment it turns golden — when the needle hits the gold zone!' },
-  cream: { ko: '크림을 고르고 버튼을 꾹 누르고 있으면 돌려 가며 발라져. 표시된 칸에서 떼!', en: 'Pick a cream, then hold the button to spread it as the cake turns. Let go in the marked zone!' },
-  decor: { ko: '윗면을 눌러서 토핑을 올려 봐. 섞어도 돼.', en: 'Tap the top of the cake to place toppings. Mixing is fine.' },
-  raw: { ko: '조금만 더 구웠으면 좋았을 텐데… 괜찮아, 크림으로 커버하자.', en: 'Could’ve used a little longer… It’s fine, the cream will cover it.' },
-  good: { ko: '응, 잘 구워졌어.', en: 'Yep, that’s nicely baked.' },
-  perfect: { ko: '오… 색 진짜 예쁘다. 재능 있는데?', en: 'Whoa… look at that colour. You’ve got talent.' },
-  burnt: { ko: '…바닥만 살짝 깎아 내면 돼. 진짜야.', en: '…We’ll just trim the bottom. Really, it’s fine.' },
-  thin: { ko: '아직 시트가 보여. 조금 더 발라도 돼.', en: 'I can still see the sponge. You can add more.' },
-  ok: { ko: '조금만 더 바르면 딱일 것 같은데.', en: 'A little more and it’ll be just right.' },
-  smooth: { ko: '완벽해. 엄청 매끈하다.', en: 'Perfect. Super smooth.' },
-  messy: { ko: '하하… 넘쳤네. 그래도 맛있어 보여.', en: 'Haha… it overflowed. Still looks tasty, though.' },
-  star1: { ko: '괜찮아, 처음이잖아. 실수는 누구나 해. 다음엔 더 잘하자!', en: 'It’s okay, it’s your first time. We all make mistakes. Let’s do better next time!' },
-  star2: { ko: '꽤 좋은데? 조금만 더 연습하면 완벽하겠어. 와구리 씨한테 가져가자.', en: 'Pretty good! A bit more practice and it’ll be perfect. Let’s take it to Waguri-san.' },
-  star3: { ko: '…대단하다. 이건 가게에 내놔도 되겠어.', en: '…That’s amazing. We could sell this in the shop.' },
+  base: { ko: '와구리 씨가 좋아하는 걸 떠올려 봐.', en: 'Think about what Waguri-san likes.', ja: '和栗さんの好きなものを思い出してみて。' },
+  bake: { ko: '노릇노릇해지는 순간에 꺼내는 거야. 바늘이 금색 칸에 왔을 때!', en: 'Take it out the moment it turns golden — when the needle hits the gold zone!', ja: 'こんがりきつね色になった瞬間に出すんだ。針が金色のところに来たら！' },
+  cream: { ko: '크림을 고르고 버튼을 꾹 누르고 있으면 돌려 가며 발라져. 표시된 칸에서 떼!', en: 'Pick a cream, then hold the button to spread it as the cake turns. Let go in the marked zone!', ja: 'クリームを選んで、ボタンを長押しすると回しながら塗れる。印のところで離して！' },
+  decor: { ko: '윗면을 눌러서 토핑을 올려 봐. 섞어도 돼.', en: 'Tap the top of the cake to place toppings. Mixing is fine.', ja: 'ケーキの上をタップしてトッピングをのせてみて。混ぜてもいいよ。' },
+  raw: { ko: '조금만 더 구웠으면 좋았을 텐데… 괜찮아, 크림으로 커버하자.', en: 'Could’ve used a little longer… It’s fine, the cream will cover it.', ja: 'もうちょっと焼けばよかったかもな… 大丈夫、クリームでカバーしよう。' },
+  good: { ko: '응, 잘 구워졌어.', en: 'Yep, that’s nicely baked.', ja: 'うん、いい感じに焼けてる。' },
+  perfect: { ko: '오… 색 진짜 예쁘다. 재능 있는데?', en: 'Whoa… look at that colour. You’ve got talent.', ja: 'おお… すげえきれいな色。才能あるんじゃない？' },
+  burnt: { ko: '…바닥만 살짝 깎아 내면 돼. 진짜야.', en: '…We’ll just trim the bottom. Really, it’s fine.', ja: '…底をちょっと削れば平気。ほんとに。' },
+  thin: { ko: '아직 시트가 보여. 조금 더 발라도 돼.', en: 'I can still see the sponge. You can add more.', ja: 'まだスポンジが見えてる。もう少し塗っていいよ。' },
+  ok: { ko: '조금만 더 바르면 딱일 것 같은데.', en: 'A little more and it’ll be just right.', ja: 'あとちょっと塗ればぴったりだと思う。' },
+  smooth: { ko: '완벽해. 엄청 매끈하다.', en: 'Perfect. Super smooth.', ja: '完璧。めちゃくちゃなめらかだ。' },
+  messy: { ko: '하하… 넘쳤네. 그래도 맛있어 보여.', en: 'Haha… it overflowed. Still looks tasty, though.', ja: 'はは… あふれちゃったな。でも、うまそうだよ。' },
+  star1: { ko: '괜찮아, 처음이잖아. 실수는 누구나 해. 다음엔 더 잘하자!', en: 'It’s okay, it’s your first time. We all make mistakes. Let’s do better next time!', ja: '大丈夫、初めてなんだし。失敗は誰にでもある。次はもっと上手くやろう！' },
+  star2: { ko: '꽤 좋은데? 조금만 더 연습하면 완벽하겠어. 와구리 씨한테 가져가자.', en: 'Pretty good! A bit more practice and it’ll be perfect. Let’s take it to Waguri-san.', ja: 'けっこういいじゃん。もう少し練習すれば完璧だな。和栗さんに持っていこう。' },
+  star3: { ko: '…대단하다. 이건 가게에 내놔도 되겠어.', en: '…That’s amazing. We could sell this in the shop.', ja: '…すごいな。これ、店に出せるよ。' },
 } satisfies Record<string, T>;
 
 export const BAKE_TXT: Record<Bake, T> = {
-  raw: { ko: '덜 익었어요', en: 'A bit underbaked' },
-  good: { ko: '잘 구워졌어요', en: 'Nicely baked' },
-  perfect: { ko: '완벽한 황금빛!', en: 'Perfectly golden!' },
-  burnt: { ko: '앗, 탔어요…', en: 'Oops, it burnt…' },
+  raw: { ko: '덜 익었어요', en: 'A bit underbaked', ja: 'ちょっと生焼け' },
+  good: { ko: '잘 구워졌어요', en: 'Nicely baked', ja: 'いい焼き加減' },
+  perfect: { ko: '완벽한 황금빛!', en: 'Perfectly golden!', ja: '完璧なきつね色！' },
+  burnt: { ko: '앗, 탔어요…', en: 'Oops, it burnt…', ja: 'あっ、焦げちゃった…' },
 };
 export const FROST_TXT: Record<Frost, T> = {
-  thin: { ko: '크림이 모자라요', en: 'Not enough cream' },
-  ok: { ko: '조금 얇아요', en: 'A little thin' },
-  perfect: { ko: '매끈하게 완벽!', en: 'Silky smooth!' },
-  messy: { ko: '크림이 흘러넘쳤어요!', en: 'Cream everywhere!' },
+  thin: { ko: '크림이 모자라요', en: 'Not enough cream', ja: 'クリームが足りない' },
+  ok: { ko: '조금 얇아요', en: 'A little thin', ja: 'ちょっと薄い' },
+  perfect: { ko: '매끈하게 완벽!', en: 'Silky smooth!', ja: 'なめらかで完璧！' },
+  messy: { ko: '크림이 흘러넘쳤어요!', en: 'Cream everywhere!', ja: 'クリームがあふれた！' },
 };
 
 export function cakeScore(c: CakeChoice) {
@@ -132,8 +132,9 @@ function objParticle(word: string) {
 
 export function cakeName(c: CakeChoice, lang: Lang) {
   const base = cakeItem('base', c.base), cream = cakeItem('cream', c.cream), top = cakeItem('top', c.top);
-  if (!base || !cream || !top) return lang === 'ko' ? '케이크' : 'a cake';
+  if (!base || !cream || !top) return { ko: '케이크', en: 'a cake', ja: 'ケーキ' }[lang];
   if (lang === 'en') return `a ${base.phrase} sponge cake with ${cream.phrase} and ${top.phrase} on top`;
+  if (lang === 'ja') return `${base.name.ja}スポンジに${cream.name.ja}を塗って、${top.name.ja}をのせたケーキ`;
   const cr = cream.name.ko, tp = top.name.ko;
   return `${base.name.ko} 시트에 ${cr}${objParticle(cr)} 바르고 ${tp}${objParticle(tp)} 올린 케이크`;
 }

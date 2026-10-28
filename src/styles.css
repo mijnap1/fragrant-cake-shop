@@ -11,6 +11,13 @@
 html[lang='en'] {
   --title-font: 'Fredoka', 'Jua', sans-serif;
 }
+/* Jua and Gowun Dodum have no kana, so Japanese gets its own rounded fonts */
+html[lang='ja'] {
+  --title-font: 'Kiwi Maru', 'Fredoka', sans-serif;
+  --body-font: 'Zen Maru Gothic', sans-serif;
+}
+/* keep-all stops Japanese (written without spaces) from wrapping at all */
+html[lang='ja'] :is(.text, .log-item, .end-card p) { word-break: normal; line-break: strict; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body, #root { height: 100%; }

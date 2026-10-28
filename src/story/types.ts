@@ -1,4 +1,4 @@
-export type Lang = 'ko' | 'en';
+export type Lang = 'ko' | 'en' | 'ja';
 /** A line of text in every supported language. */
 export type T = Record<Lang, string>;
 

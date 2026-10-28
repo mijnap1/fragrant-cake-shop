@@ -1,6 +1,6 @@
 # 향기로운 케이크 가게 · The Fragrant Cake Shop
 
-「향기로운 꽃은 늠름하게 핀다」 비공식 팬메이드 비주얼 노벨 (한국어 / English).
+「향기로운 꽃은 늠름하게 핀다」 비공식 팬메이드 비주얼 노벨 (한국어 / English / 日本語).
 
 ```bash
 npm install
@@ -12,7 +12,7 @@ npm run build      # typecheck + production build → dist/
 
 | Path | What |
 |---|---|
-| `src/story/chapter1.ts` | The script — every line in `ko` + `en`, choices, branches, endings |
+| `src/story/chapter1.ts` | The script — every line in `ko` + `en` + `ja`, choices, branches, endings |
 | `src/story/cake.ts` | Cake builder ingredients and Kaoruko's favourite |
 | `src/story/cast.ts` | Character names/colours and ending texts |
 | `src/engine/game.ts` | Story engine (reducer), saving, endings |
@@ -28,10 +28,10 @@ npm run build      # typecheck + production build → dist/
 Lines are written with small helpers in `chapter1.ts`:
 
 ```ts
-K('happy', '한국어 대사', 'English line'),        // Kaoruko speaks (expression, ko, en)
-R('blush', '…', '…'),                              // Rintaro speaks
-N('나레이션', 'Narration'),                          // narration
-Q({ ko: '질문', en: 'Question' }, [opt('선택지', 'Option', 'someLabel', { k: 1 })]),
+K('happy', '한국어 대사', 'English line', '日本語のセリフ'),  // Kaoruko speaks (expression, ko, en, ja)
+R('blush', '…', '…', '…'),                                 // Rintaro speaks
+N('나레이션', 'Narration', 'ナレーション'),                    // narration
+Q({ ko: '질문', en: 'Question', ja: '質問' }, [opt('선택지', 'Option', '選択肢', 'someLabel', { k: 1 })]),
 ```
 
 Jump targets must be added to the `LABELS` list at the top of the file — a typo becomes a type error.
