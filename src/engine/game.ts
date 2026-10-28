@@ -153,7 +153,7 @@ export function fill(text: string, s: GameState, lang: Lang) {
 const SAVE_KEY = 'kaoru-vn-save';
 const END_KEY = 'kaoru-vn-endings';
 // Bump whenever SCRIPT changes shape, so stale saves don't point at the wrong lines.
-const SAVE_VERSION = 3;
+const SAVE_VERSION = 4;
 
 export type SaveData = Omit<GameState, 'pops' | 'popSeq'>;
 
